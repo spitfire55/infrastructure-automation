@@ -1,2 +1,2 @@
-# infrastructure-automation
-A collection of scripts, tools, and configurations to automate AWS infrastructure
+This is a colllection of scripts, tools, and configurations for infrastructure
+automation on AWS.

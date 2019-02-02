@@ -1,0 +1,42 @@
+{
+  "variables": {
+    "aws_region": "us-east-1",
+    "vault_module_version": "v0.11.3",
+    "vault_version": "1.0.2",
+    "consul_module_version": "v0.4.5",
+    "consul_version": "1.4.1"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "ami_name": "vault-consul-ubuntu-{{isotime \"01-02-06_03-04-05\"}}",
+    "ami_description": "Ubuntu 18.04 with Vault and Consul",
+    "instance_type": "t2.micro",
+    "region": "{{user `aws_region`}}",
+    "source_ami_filter": {
+      "filters": {
+        "virtualization-type": "hvm",
+        "architecture": "x86_64",
+        "name": "*ubuntu-bionic-18.04-amd64-server*",
+        "root-device-type": "ebs"
+      },
+      "owners": ["099720109477"],
+      "most_recent": true
+    },
+    "ssh_username": "ubuntu"
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "inline": [
+        "git clone --branch {{user `vault_module_version`}} https://github.com/hashicorp/terraform-aws-vault.git /tmp/terraform-aws-vault",
+        "/tmp/terraform-aws-vault/modules/install-vault/install-vault --version {{user `vault_version`}}"
+    ],
+    "pause_before": "30s"
+  },{
+    "type": "shell",
+    "inline": [
+      "git clone --branch {{user `consul_module_version`}} https://github.com/hashicorp/terraform-aws-consul.git /tmp/terraform-aws-consul",
+      " /tmp/terraform-aws-consul/modules/install-consul/install-consul --version {{user `consul_version`}};",
+      "/tmp/terraform-aws-consul/modules/install-dnsmasq/install-dnsmasq"
+    ]
+  }]
+}

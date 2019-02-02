@@ -1,0 +1,22 @@
+Vagrant.configure("2") do |config|
+    config.env.enable
+    config.vm.box = "generic/ubuntu1804"
+    config.vm.hostname = ENV['VM_HOSTNAME']
+
+    config.vm.provider "virtualbox" do |v|
+        v.gui = true
+        v.name = ENV['VM_NAME']
+        v.customize ["modifyvm", :id, "--cpuexecutioncap", ENV['CPU_EXECUTION_CAP']]
+        v.customize ["modifyvm", :id, "--cpus", ENV['CPU_CORE_COUNT']]
+        v.customize ["modifyvm", :id, "--memory", ENV['MEMORY_MB']]
+    end
+
+    config.ssh.forward_agent - true
+
+    config.vm.provision "shell", inline: "ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts"
+
+    config.vm.provision "file", source: "~/.aws/credentials", destination: "/home/vagrant/.aws/credentials"
+    config.vm.provision "file", source: "~/.ssh/id_rsa", destination: "/root/.ssh/id_rsa"
+    config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/root/.ssh/id_rsa.pub"
+    config.vm.provision "shell", path: "provision.sh"
+end
